@@ -3,19 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weather App</title>
+  <title>SkyCast Weather Dashboard</title>
   <link rel="stylesheet" href="/style/style.css">
 </head>
 <body>
-  
-  <form class="weatherForm">
-    <input type="text" class="cityInput" placeholder="Enter City">
-    <button type="submit">Get Weather</button>
-  </form>
+  <main class="app">
+    <section class="weather-shell">
+      <div class="topbar">
+        <div>
+          <p class="eyebrow">SkyCast Weather Dashboard</p>
+          <h1>SkyCast</h1>
+          <p class="subtitle">Enter a city name to get started</p>
+        </div>
 
-  <div class="card" style="display: none;">
-  </div>
+        <button id="themeToggle" class="ghost-button" type="button">
+          Dark Mode
+        </button>
+      </div>
+
+       <form class="weatherForm" id="weatherForm">
+        <input
+          type="text"
+          class="cityInput"
+          id="cityInput"
+          placeholder="Enter a city"
+          autocomplete="off"
+          autofocus
+        />
+
+        <button type="submit" id="submitButton">Get Weather</button>
+      </form>
+
+      <div class="toolbar">
+        <div class="unit-toggle">
+          <button type="button" class="unit-button active" data-unit="metric">°C</button>
+          <button type="button" class="unit-button" data-unit="imperial">°F</button>
+        </div>
+
+        <button type="button" id="locationButton" class="ghost-button">
+          Use My Location
+        </button>
+      </div>
+
+      <section class="card hidden" id="card">
+        <div class="card-header">
+          <div>
+            <h2 class="cityDisplay" id="cityDisplay"></h2>
+            <p class="descDisplay" id="descDisplay"></p>
+          </div>
+          <div class="weatherEmoji" id="weatherEmoji"></div>
+        </div>
+
+        <div class="temperature-row">
+          <p class="tempDisplay" id="tempDisplay"></p>
+          <p class="feelsLikeDisplay" id="feelsLikeDisplay"></p>
+        </div>
+
+        <div class="details-grid">
+          <article class="detail-box">
+            <span class="detail-label">Humidity</span>
+            <span class="detail-value" id="humidityDisplay"></span>
+          </article>
+
+          <article class="detail-box">
+            <span class="detail-label">Wind</span>
+            <span class="detail-value" id="windDisplay"></span>
+          </article>
+
+          <article class="detail-box">
+            <span class="detail-label">Pressure</span>
+            <span class="detail-value" id="pressureDisplay"></span>
+          </article>
+
+          <article class="detail-box">
+            <span class="detail-label">Min / Max</span>
+            <span class="detail-value" id="minMaxDisplay"></span>
+          </article>
+        </div>
+      </section>
+
+      <section class="message hidden" id="message"></section>
+
+      <section class="recent-searches">
+        <div class="section-header">
+          <h3>Recent Searches</h3>
+          <button type="button" id="clearHistoryButton" class="text-button">
+            Clear
+          </button>
+        </div>
+
+        <div class="history-list" id="historyList">
+          <p class="empty-text">No recent searches yet.</p>
+        </div>
+      </section>
+    </section>
+  </main>
 
   <script src="/js/script.js"></script>
+  
 </body>
 </html>
