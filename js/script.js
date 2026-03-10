@@ -199,7 +199,8 @@ function getWeatherEmoji(weatherId) {
 function showMessage(text, isError = false) {
   message.textContent = text;
   message.classList.remove("hidden");
-  message.style.color = isError ? "#dc2626" : "";
+  message.style.color = isError ? "var(--danger)" : "";
+
 }
 
 function setLoadingState(isLoading, buttonText = "Get Weather") {

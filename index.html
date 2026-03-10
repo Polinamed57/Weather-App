@@ -1,37 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SkyCast Weather Dashboard</title>
-  <link rel="stylesheet" href="/style/style.css">
+  <link rel="stylesheet" href="/style/style.css" />
 </head>
 <body>
-  <main class="app">
-    <section class="weather-shell">
-      <div class="topbar">
-        <div>
-          <p class="eyebrow">SkyCast Weather Dashboard</p>
+  <main class="app-shell">
+    <section class="dashboard">
+      <header class="dashboard-header">
+        <div class="header-copy">
+          <p class="eyebrow">Portfolio Project</p>
           <h1>SkyCast</h1>
-          <p class="subtitle">Enter a city name to get started</p>
+          <p class="subtitle">
+            A modern weather dashboard built with HTML, CSS, and JavaScript.
+          </p>
         </div>
 
-        <button id="themeToggle" class="ghost-button" type="button">
-          Dark Mode
-        </button>
-      </div>
+        <div class="header-actions">
+          <button id="themeToggle" class="ghost-button" type="button">
+            Dark Mode
+          </button>
+        </div>
+      </header>
 
-       <form class="weatherForm" id="weatherForm">
+      <form class="weatherForm search-bar" id="weatherForm">
         <input
           type="text"
           class="cityInput"
           id="cityInput"
-          placeholder="Enter a city"
+          placeholder="Search for a city..."
           autocomplete="off"
           autofocus
         />
-
-        <button type="submit" id="submitButton">Get Weather</button>
+        <button type="submit" id="submitButton">Search</button>
       </form>
 
       <div class="toolbar">
@@ -45,47 +48,49 @@
         </button>
       </div>
 
-      <section class="card hidden" id="card">
-        <div class="card-header">
-          <div>
-            <h2 class="cityDisplay" id="cityDisplay"></h2>
-            <p class="descDisplay" id="descDisplay"></p>
+      <section class="message hidden" id="message"></section>
+
+      <section class="main-panel hidden" id="card">
+        <div class="current-weather">
+          <div class="current-top">
+            <div>
+              <h2 class="cityDisplay" id="cityDisplay"></h2>
+              <p class="descDisplay" id="descDisplay"></p>
+            </div>
+            <div class="weatherEmoji" id="weatherEmoji"></div>
           </div>
-          <div class="weatherEmoji" id="weatherEmoji"></div>
+
+          <div class="temperature-block">
+            <p class="tempDisplay" id="tempDisplay"></p>
+            <p class="feelsLikeDisplay" id="feelsLikeDisplay"></p>
+          </div>
         </div>
 
-        <div class="temperature-row">
-          <p class="tempDisplay" id="tempDisplay"></p>
-          <p class="feelsLikeDisplay" id="feelsLikeDisplay"></p>
-        </div>
-
-        <div class="details-grid">
-          <article class="detail-box">
+        <div class="weather-details">
+          <article class="detail-card">
             <span class="detail-label">Humidity</span>
             <span class="detail-value" id="humidityDisplay"></span>
           </article>
 
-          <article class="detail-box">
+          <article class="detail-card">
             <span class="detail-label">Wind</span>
             <span class="detail-value" id="windDisplay"></span>
           </article>
 
-          <article class="detail-box">
+          <article class="detail-card">
             <span class="detail-label">Pressure</span>
             <span class="detail-value" id="pressureDisplay"></span>
           </article>
 
-          <article class="detail-box">
+          <article class="detail-card">
             <span class="detail-label">Min / Max</span>
             <span class="detail-value" id="minMaxDisplay"></span>
           </article>
         </div>
       </section>
 
-      <section class="message hidden" id="message"></section>
-
-      <section class="recent-searches">
-        <div class="section-header">
+      <section class="history-section">
+        <div class="history-header">
           <h3>Recent Searches</h3>
           <button type="button" id="clearHistoryButton" class="text-button">
             Clear
@@ -99,7 +104,6 @@
     </section>
   </main>
 
-  <script src="/js/script.js"></script>
-  
+  <script src="js/script.js"></script>
 </body>
 </html>
