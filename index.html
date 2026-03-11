@@ -7,15 +7,21 @@
   <link rel="stylesheet" href="/style/style.css" />
 </head>
 <body>
+  <div class="weather-overlay" aria-hidden="true">
+    <div class="sun-layer"></div>
+    <div class="cloud-layer cloud-layer-one"></div>
+    <div class="cloud-layer cloud-layer-two"></div>
+    <div class="rain-layer"></div>
+    <div class="snow-layer"></div>
+    <div class="mist-layer"></div>
+    <div class="storm-flash"></div>
+  </div>
+
   <main class="app-shell">
     <section class="dashboard">
       <header class="dashboard-header">
         <div class="header-copy">
-          <p class="eyebrow">Portfolio Project</p>
           <h1>SkyCast</h1>
-          <p class="subtitle">
-            A modern weather dashboard built with HTML, CSS, and JavaScript.
-          </p>
         </div>
 
         <div class="header-actions">
@@ -51,40 +57,66 @@
       <section class="message hidden" id="message"></section>
 
       <section class="main-panel hidden" id="card">
-        <div class="current-weather">
+        <div class="current-weather glass-panel">
           <div class="current-top">
             <div>
+              <p class="location-tag" id="locationMeta">Current Conditions</p>
               <h2 class="cityDisplay" id="cityDisplay"></h2>
               <p class="descDisplay" id="descDisplay"></p>
             </div>
-            <div class="weatherEmoji" id="weatherEmoji"></div>
+
+            <div class="weather-visual">
+              <div class="weatherEmoji" id="weatherEmoji"></div>
+            </div>
           </div>
 
           <div class="temperature-block">
             <p class="tempDisplay" id="tempDisplay"></p>
             <p class="feelsLikeDisplay" id="feelsLikeDisplay"></p>
           </div>
+
+          <div class="sun-times">
+            <div class="sun-time-box">
+              <span class="sun-time-label">Sunrise</span>
+              <span class="sun-time-value" id="sunriseDisplay"></span>
+            </div>
+
+            <div class="sun-time-box">
+              <span class="sun-time-label">Sunset</span>
+              <span class="sun-time-value" id="sunsetDisplay"></span>
+            </div>
+          </div>
         </div>
 
         <div class="weather-details">
-          <article class="detail-card">
+          <article class="detail-card reveal-delay-1">
             <span class="detail-label">Humidity</span>
             <span class="detail-value" id="humidityDisplay"></span>
           </article>
 
-          <article class="detail-card">
+          <article class="detail-card reveal-delay-2">
             <span class="detail-label">Wind</span>
             <span class="detail-value" id="windDisplay"></span>
           </article>
 
-          <article class="detail-card">
+          <article class="detail-card reveal-delay-3">
             <span class="detail-label">Pressure</span>
             <span class="detail-value" id="pressureDisplay"></span>
           </article>
 
-          <article class="detail-card">
+          <article class="detail-card reveal-delay-4">
             <span class="detail-label">Min / Max</span>
             <span class="detail-value" id="minMaxDisplay"></span>
+          </article>
+
+          <article class="detail-card reveal-delay-5">
+            <span class="detail-label">Visibility</span>
+            <span class="detail-value" id="visibilityDisplay"></span>
+          </article>
+
+          <article class="detail-card reveal-delay-6">
+            <span class="detail-label">Units</span>
+            <span class="detail-value" id="unitDisplay"></span>
           </article>
         </div>
       </section>
