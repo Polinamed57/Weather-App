@@ -16,6 +16,9 @@
   --chip-bg: rgba(255, 255, 255, 0.18);
   --danger: #dc2626;
   --message-bg: rgba(255, 255, 255, 0.2);
+  --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.28);
+  --font-body: "Manrope", "Avenir Next", "Segoe UI", sans-serif;
+  --font-heading: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
 }
 
 body.dark {
@@ -31,6 +34,7 @@ body.dark {
   --chip-bg: rgba(15, 23, 42, 0.42);
   --danger: #f87171;
   --message-bg: rgba(15, 23, 42, 0.42);
+  --focus-ring: 0 0 0 3px rgba(96, 165, 250, 0.34);
 }
 
 body.weather-sunny {
@@ -61,7 +65,7 @@ html,
 body {
   min-height: 100%;
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
   color: var(--text);
   background: var(--bg);
   transition: background 0.7s ease, color 0.25s ease;
@@ -110,7 +114,7 @@ input {
   justify-content: space-between;
   gap: 24px;
   align-items: flex-start;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 
 .eyebrow {
@@ -124,6 +128,7 @@ input {
 
 .header-copy h1 {
   margin: 0;
+  font-family: var(--font-heading);
   font-size: 3rem;
   line-height: 0.95;
   letter-spacing: -0.03em;
@@ -146,7 +151,7 @@ input {
   display: grid;
   grid-template-columns: 1fr 160px;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .cityInput {
@@ -160,9 +165,19 @@ input {
   transition: border-color 0.2s ease, transform 0.2s ease, background 0.25s ease;
 }
 
+.cityInput::placeholder {
+  color: color-mix(in srgb, var(--muted) 80%, transparent);
+}
+
 .cityInput:focus {
   border-color: var(--primary);
   transform: translateY(-1px);
+}
+
+.search-hint {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
 #submitButton,
@@ -294,6 +309,7 @@ input {
 .cityDisplay {
   margin: 0 0 10px;
   font-size: 2.25rem;
+  font-family: var(--font-heading);
   line-height: 1.08;
   letter-spacing: -0.02em;
 }
@@ -303,6 +319,12 @@ input {
   color: var(--muted);
   font-size: 1.08rem;
   text-transform: capitalize;
+}
+
+.favorite-toggle {
+  margin-top: 10px;
+  padding: 0;
+  font-size: 0.92rem;
 }
 
 .weather-visual {
@@ -324,6 +346,7 @@ input {
 
 .tempDisplay {
   margin: 0;
+  font-family: var(--font-heading);
   font-size: 5rem;
   line-height: 0.95;
   font-weight: 800;
@@ -334,6 +357,12 @@ input {
   margin: 12px 0 0;
   color: var(--muted);
   font-size: 1rem;
+}
+
+.last-updated {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
 .sun-times {
@@ -409,6 +438,52 @@ input {
   padding-top: 4px;
 }
 
+.forecast-section {
+  padding-top: 4px;
+  margin-bottom: 20px;
+}
+
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.forecast-card {
+  padding: 14px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface-card);
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.forecast-day {
+  display: block;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.forecast-emoji {
+  display: block;
+  margin: 8px 0;
+  font-size: 1.7rem;
+}
+
+.forecast-temp {
+  display: block;
+  font-weight: 700;
+  font-size: 0.96rem;
+}
+
+.forecast-desc {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  text-transform: capitalize;
+}
+
 .history-header {
   display: flex;
   justify-content: space-between;
@@ -434,6 +509,16 @@ input {
   gap: 10px;
 }
 
+.favorite-chip-wrap {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--chip-bg);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
 .history-chip {
   padding: 10px 14px;
   border-radius: 999px;
@@ -444,9 +529,43 @@ input {
   backdrop-filter: blur(10px);
 }
 
+.favorite-chip-wrap .history-chip {
+  border: none;
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.chip-remove {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 9px 10px;
+  cursor: pointer;
+  line-height: 1;
+}
+
 .empty-text {
   margin: 0;
   color: var(--muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 /* WEATHER EFFECT LAYERS */
@@ -812,6 +931,10 @@ body.weather-storm .rain-drop {
     grid-template-columns: 1fr;
   }
 
+  .forecast-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .current-top {
     flex-direction: column;
   }
@@ -826,5 +949,14 @@ body.weather-storm .rain-drop {
 
   .sun-times {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

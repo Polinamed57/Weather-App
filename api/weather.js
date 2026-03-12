@@ -40,7 +40,7 @@ function getApiKeyFromLocalEnvFile() {
 }
 
 export default async function handler(req, res) {
-  const { city, lat, lon, unit = "metric" } = req.query;
+  const { city, lat, lon, unit = "metric", includeForecast = "false" } = req.query;
   const apiKey = process.env.OPENWEATHER_API_KEY || getApiKeyFromLocalEnvFile();
 
   if (!apiKey) {
@@ -69,7 +69,28 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(200).json(data);
+    if (includeForecast !== "true") {
+      return res.status(200).json(data);
+    }
+
+    const {
+      coord: { lat: resolvedLat, lon: resolvedLon },
+    } = data;
+
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${resolvedLat}&lon=${resolvedLon}&appid=${apiKey}&units=${unit}`;
+    const forecastResponse = await fetch(forecastUrl);
+    const forecastData = await forecastResponse.json();
+
+    if (!forecastResponse.ok) {
+      return res.status(forecastResponse.status).json({
+        error: forecastData?.message || "Unable to fetch forecast data.",
+      });
+    }
+
+    return res.status(200).json({
+      current: data,
+      forecast: forecastData,
+    });
   } catch {
     return res.status(500).json({ error: "Server error." });
   }

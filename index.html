@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SkyCast Weather Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style/style.css" />
 </head>
 <body>
@@ -25,13 +28,14 @@
         </div>
 
         <div class="header-actions">
-          <button id="themeToggle" class="ghost-button" type="button">
+          <button id="themeToggle" class="ghost-button" type="button" aria-label="Toggle light or dark mode">
             Dark Mode
           </button>
         </div>
       </header>
 
-      <form class="weatherForm search-bar" id="weatherForm">
+      <form class="weatherForm search-bar" id="weatherForm" novalidate>
+        <label for="cityInput" class="sr-only">City name</label>
         <input
           type="text"
           class="cityInput"
@@ -44,7 +48,7 @@
       </form>
 
       <div class="toolbar">
-        <div class="unit-toggle">
+        <div class="unit-toggle" role="group" aria-label="Temperature unit">
           <button type="button" class="unit-button active" data-unit="metric">°C</button>
           <button type="button" class="unit-button" data-unit="imperial">°F</button>
         </div>
@@ -54,15 +58,18 @@
         </button>
       </div>
 
-      <section class="message hidden" id="message"></section>
+      <section class="message hidden" id="message" role="status" aria-live="polite"></section>
 
-      <section class="main-panel hidden" id="card">
+      <section class="main-panel hidden" id="card" aria-live="polite">
         <div class="current-weather glass-panel">
           <div class="current-top">
             <div>
               <p class="location-tag" id="locationMeta">Current Conditions</p>
               <h2 class="cityDisplay" id="cityDisplay"></h2>
               <p class="descDisplay" id="descDisplay"></p>
+              <button type="button" class="text-button favorite-toggle hidden" id="favoriteToggle">
+                Add to Favorites
+              </button>
             </div>
 
             <div class="weather-visual">
@@ -73,6 +80,7 @@
           <div class="temperature-block">
             <p class="tempDisplay" id="tempDisplay"></p>
             <p class="feelsLikeDisplay" id="feelsLikeDisplay"></p>
+            <p class="last-updated" id="lastUpdatedDisplay"></p>
           </div>
 
           <div class="sun-times">
@@ -121,6 +129,28 @@
         </div>
       </section>
 
+      <section class="forecast-section">
+        <div class="history-header">
+          <h3>5-Day Forecast</h3>
+        </div>
+        <div class="forecast-grid" id="forecastGrid">
+          <p class="empty-text">Search a city to view the forecast.</p>
+        </div>
+      </section>
+
+      <section class="history-section">
+        <div class="history-header">
+          <h3>Favorite Cities</h3>
+          <button type="button" id="clearFavoritesButton" class="text-button">
+            Clear
+          </button>
+        </div>
+
+        <div class="history-list" id="favoritesList" aria-label="Favorite cities">
+          <p class="empty-text">No favorite cities yet.</p>
+        </div>
+      </section>
+
       <section class="history-section">
         <div class="history-header">
           <h3>Recent Searches</h3>
@@ -129,7 +159,7 @@
           </button>
         </div>
 
-        <div class="history-list" id="historyList">
+        <div class="history-list" id="historyList" aria-label="Recent city searches">
           <p class="empty-text">No recent searches yet.</p>
         </div>
       </section>

@@ -5,6 +5,9 @@ const card = document.querySelector("#card");
 const message = document.querySelector("#message");
 const historyList = document.querySelector("#historyList");
 const clearHistoryButton = document.querySelector("#clearHistoryButton");
+const favoritesList = document.querySelector("#favoritesList");
+const clearFavoritesButton = document.querySelector("#clearFavoritesButton");
+const forecastGrid = document.querySelector("#forecastGrid");
 const themeToggle = document.querySelector("#themeToggle");
 const locationButton = document.querySelector("#locationButton");
 const unitButtons = document.querySelectorAll(".unit-button");
@@ -22,19 +25,30 @@ const visibilityDisplay = document.querySelector("#visibilityDisplay");
 const unitDisplay = document.querySelector("#unitDisplay");
 const sunriseDisplay = document.querySelector("#sunriseDisplay");
 const sunsetDisplay = document.querySelector("#sunsetDisplay");
+const lastUpdatedDisplay = document.querySelector("#lastUpdatedDisplay");
 const locationMeta = document.querySelector("#locationMeta");
+const favoriteToggle = document.querySelector("#favoriteToggle");
 const rainLayer = document.querySelector(".rain-layer");
 const snowLayer = document.querySelector(".snow-layer");
 const sunLayer = document.querySelector(".sun-layer");
 
 let currentUnit = localStorage.getItem("weatherUnit") || "metric";
 let recentSearches = JSON.parse(localStorage.getItem("recentSearches")) || [];
+let favoriteCities = JSON.parse(localStorage.getItem("favoriteCities")) || [];
 let currentTheme = localStorage.getItem("weatherTheme") || "light";
+let lastSearchedCity = localStorage.getItem("lastSearchedCity") || "";
+let currentWeatherCity = "";
 
 applyTheme();
 updateUnitButtons();
 renderRecentSearches();
+renderFavoriteCities();
 clearWeatherParticles();
+
+if (lastSearchedCity) {
+  cityInput.value = lastSearchedCity;
+  handleWeatherSearch(lastSearchedCity, false);
+}
 
 weatherForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -55,6 +69,13 @@ clearHistoryButton.addEventListener("click", () => {
   renderRecentSearches();
 });
 
+clearFavoritesButton.addEventListener("click", () => {
+  favoriteCities = [];
+  localStorage.setItem("favoriteCities", JSON.stringify(favoriteCities));
+  renderFavoriteCities();
+  updateFavoriteToggleButton();
+});
+
 themeToggle.addEventListener("click", () => {
   currentTheme = currentTheme === "dark" ? "light" : "dark";
   localStorage.setItem("weatherTheme", currentTheme);
@@ -73,9 +94,11 @@ locationButton.addEventListener("click", async () => {
     async (position) => {
       try {
         const { latitude, longitude } = position.coords;
-        const weatherData = await getWeatherByCoordinates(latitude, longitude);
-        displayWeatherInfo(weatherData);
-        storeRecentSearch(weatherData.name);
+        const weatherPayload = await getWeatherByCoordinates(latitude, longitude);
+        const currentData = weatherPayload.current || weatherPayload;
+        displayWeatherInfo(currentData);
+        renderForecast(weatherPayload.forecast, currentData.timezone, currentData.dt);
+        storeRecentSearch(currentData.name);
         showMessage("Showing weather for your current location.");
       } catch (error) {
         console.error(error);
@@ -89,6 +112,24 @@ locationButton.addEventListener("click", async () => {
       showMessage("Unable to access your location.", true);
     }
   );
+});
+
+favoriteToggle.addEventListener("click", () => {
+  if (!currentWeatherCity) return;
+
+  if (isFavoriteCity(currentWeatherCity)) {
+    favoriteCities = favoriteCities.filter(
+      (city) => city.toLowerCase() !== currentWeatherCity.toLowerCase()
+    );
+    showMessage(`${currentWeatherCity} removed from favorites.`);
+  } else {
+    favoriteCities = [currentWeatherCity, ...favoriteCities].slice(0, 8);
+    showMessage(`${currentWeatherCity} added to favorites.`);
+  }
+
+  localStorage.setItem("favoriteCities", JSON.stringify(favoriteCities));
+  renderFavoriteCities();
+  updateFavoriteToggleButton();
 });
 
 unitButtons.forEach((button) => {
@@ -115,11 +156,13 @@ async function handleWeatherSearch(city, shouldStore = true) {
     setLoadingState(true, "Loading weather data...");
     hideMessage();
 
-    const weatherData = await getWeatherData(city);
-    displayWeatherInfo(weatherData);
+    const weatherPayload = await getWeatherData(city);
+    const currentData = weatherPayload.current || weatherPayload;
+    displayWeatherInfo(currentData);
+    renderForecast(weatherPayload.forecast, currentData.timezone, currentData.dt);
 
     if (shouldStore) {
-      storeRecentSearch(weatherData.name);
+      storeRecentSearch(currentData.name);
     }
 
   } catch (error) {
@@ -133,7 +176,7 @@ async function handleWeatherSearch(city, shouldStore = true) {
 
 async function getWeatherData(city) {
   const response = await fetch(
-    `/api/weather?city=${encodeURIComponent(city)}&unit=${currentUnit}`
+    `/api/weather?city=${encodeURIComponent(city)}&unit=${currentUnit}&includeForecast=true`
   );
 
   const contentType = response.headers.get("content-type");
@@ -153,7 +196,7 @@ async function getWeatherData(city) {
 
 async function getWeatherByCoordinates(latitude, longitude) {
   const response = await fetch(
-    `/api/weather?lat=${latitude}&lon=${longitude}&unit=${currentUnit}`
+    `/api/weather?lat=${latitude}&lon=${longitude}&unit=${currentUnit}&includeForecast=true`
   );
 
   const contentType = response.headers.get("content-type");
@@ -174,6 +217,7 @@ async function getWeatherByCoordinates(latitude, longitude) {
 function displayWeatherInfo(data) {
   const {
     name,
+    timezone,
     visibility,
     sys: { sunrise, sunset, country },
     main: { temp, feels_like, humidity, pressure, temp_min, temp_max },
@@ -184,9 +228,13 @@ function displayWeatherInfo(data) {
   applyWeatherTheme(id);
 
   cityDisplay.textContent = `${name}, ${country}`;
+  currentWeatherCity = name;
   descDisplay.textContent = description;
   weatherEmoji.textContent = getWeatherEmoji(id);
   locationMeta.textContent = getWeatherMoodLabel(id);
+  lastUpdatedDisplay.textContent = `Updated ${formatLastUpdatedTime(timezone)} local time`;
+  favoriteToggle.classList.remove("hidden");
+  updateFavoriteToggleButton();
 
   tempDisplay.textContent = `${Math.round(temp)}${getUnitSymbol()}`;
   feelsLikeDisplay.textContent = `Feels like ${Math.round(feels_like)}${getUnitSymbol()}`;
@@ -200,8 +248,8 @@ function displayWeatherInfo(data) {
 
   visibilityDisplay.textContent = formatVisibility(visibility);
   unitDisplay.textContent = currentUnit === "metric" ? "Metric (°C)" : "Imperial (°F)";
-  sunriseDisplay.textContent = formatUnixTime(sunrise);
-  sunsetDisplay.textContent = formatUnixTime(sunset);
+  sunriseDisplay.textContent = formatUnixTime(sunrise, timezone);
+  sunsetDisplay.textContent = formatUnixTime(sunset, timezone);
 
   card.classList.remove("hidden");
   restartRevealAnimation();
@@ -215,6 +263,7 @@ function restartRevealAnimation() {
 
 function hideWeatherCard() {
   card.classList.add("hidden");
+  favoriteToggle.classList.add("hidden");
 }
 
 function hideMessage() {
@@ -383,11 +432,15 @@ function showMessage(text, isError = false) {
 
 function setLoadingState(isLoading, buttonText = "Search") {
   submitButton.disabled = isLoading;
+  locationButton.disabled = isLoading;
+  weatherForm.setAttribute("aria-busy", isLoading ? "true" : "false");
   submitButton.textContent = isLoading ? buttonText : "Search";
 }
 
 function storeRecentSearch(city) {
   const normalizedCity = city.trim();
+  lastSearchedCity = normalizedCity;
+  localStorage.setItem("lastSearchedCity", normalizedCity);
 
   recentSearches = [
     normalizedCity,
@@ -423,6 +476,122 @@ function renderRecentSearches() {
   });
 }
 
+function renderFavoriteCities() {
+  favoritesList.innerHTML = "";
+
+  if (favoriteCities.length === 0) {
+    favoritesList.innerHTML = `<p class="empty-text">No favorite cities yet.</p>`;
+    return;
+  }
+
+  favoriteCities.forEach((city) => {
+    const wrap = document.createElement("div");
+    wrap.className = "favorite-chip-wrap";
+
+    const cityButton = document.createElement("button");
+    cityButton.type = "button";
+    cityButton.textContent = city;
+    cityButton.className = "history-chip";
+    cityButton.addEventListener("click", async () => {
+      cityInput.value = city;
+      await handleWeatherSearch(city, false);
+    });
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "chip-remove";
+    removeButton.setAttribute("aria-label", `Remove ${city} from favorites`);
+    removeButton.textContent = "×";
+    removeButton.addEventListener("click", () => {
+      favoriteCities = favoriteCities.filter(
+        (item) => item.toLowerCase() !== city.toLowerCase()
+      );
+      localStorage.setItem("favoriteCities", JSON.stringify(favoriteCities));
+      renderFavoriteCities();
+      updateFavoriteToggleButton();
+    });
+
+    wrap.appendChild(cityButton);
+    wrap.appendChild(removeButton);
+    favoritesList.appendChild(wrap);
+  });
+}
+
+function isFavoriteCity(city) {
+  return favoriteCities.some((item) => item.toLowerCase() === city.toLowerCase());
+}
+
+function updateFavoriteToggleButton() {
+  if (!currentWeatherCity) return;
+
+  favoriteToggle.textContent = isFavoriteCity(currentWeatherCity)
+    ? "Remove from Favorites"
+    : "Add to Favorites";
+}
+
+function renderForecast(forecastData, timezoneOffsetSeconds = 0, currentUnixTime = 0) {
+  forecastGrid.innerHTML = "";
+
+  if (!forecastData || !Array.isArray(forecastData.list)) {
+    forecastGrid.innerHTML = `<p class="empty-text">Forecast unavailable right now.</p>`;
+    return;
+  }
+
+  const currentLocalDate = getLocalDateLabel(currentUnixTime, timezoneOffsetSeconds);
+  const bestPerDay = new Map();
+
+  forecastData.list.forEach((entry) => {
+    const localDate = new Date((entry.dt + timezoneOffsetSeconds) * 1000);
+    const dateKey = localDate.toISOString().slice(0, 10);
+
+    if (dateKey === currentLocalDate) return;
+
+    const hourDistance = Math.abs(localDate.getUTCHours() - 12);
+    const existing = bestPerDay.get(dateKey);
+
+    if (!existing || hourDistance < existing.hourDistance) {
+      bestPerDay.set(dateKey, { entry, hourDistance });
+    }
+  });
+
+  const cards = [...bestPerDay.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(0, 5);
+
+  if (cards.length === 0) {
+    forecastGrid.innerHTML = `<p class="empty-text">Forecast unavailable right now.</p>`;
+    return;
+  }
+
+  cards.forEach(([dateKey, payload]) => {
+    const {
+      entry: {
+        weather: [{ id, description }],
+        main: { temp_min, temp_max },
+      },
+    } = payload;
+
+    const dayDate = new Date(`${dateKey}T00:00:00Z`);
+    const dayName = dayDate.toLocaleDateString([], {
+      weekday: "short",
+      timeZone: "UTC",
+    });
+
+    const cardItem = document.createElement("article");
+    cardItem.className = "forecast-card";
+    cardItem.innerHTML = `
+      <span class="forecast-day">${dayName}</span>
+      <span class="forecast-emoji">${getWeatherEmoji(id)}</span>
+      <span class="forecast-temp">${Math.round(temp_min)}${getUnitSymbol()} / ${Math.round(
+      temp_max
+    )}${getUnitSymbol()}</span>
+      <span class="forecast-desc">${description}</span>
+    `;
+
+    forecastGrid.appendChild(cardItem);
+  });
+}
+
 function getUnitSymbol() {
   return currentUnit === "metric" ? "°C" : "°F";
 }
@@ -448,11 +617,30 @@ function formatVisibility(value) {
   return `${(value / 1609).toFixed(1)} mi`;
 }
 
-function formatUnixTime(unixTime) {
+function formatUnixTime(unixTime, timezoneOffsetSeconds = 0) {
   if (!unixTime) return "N/A";
 
-  return new Date(unixTime * 1000).toLocaleTimeString([], {
+  const localDate = new Date((unixTime + timezoneOffsetSeconds) * 1000);
+
+  return localDate.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "UTC",
   });
+}
+
+function formatLastUpdatedTime(timezoneOffsetSeconds = 0) {
+  const localDate = new Date(Date.now() + timezoneOffsetSeconds * 1000);
+
+  return localDate.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+  });
+}
+
+function getLocalDateLabel(unixTime, timezoneOffsetSeconds = 0) {
+  return new Date((unixTime + timezoneOffsetSeconds) * 1000)
+    .toISOString()
+    .slice(0, 10);
 }
