@@ -19,6 +19,7 @@
   --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.28);
   --font-body: "Manrope", "Avenir Next", "Segoe UI", sans-serif;
   --font-heading: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  --text-button-color: #334155;
 }
 
 body.dark {
@@ -35,6 +36,7 @@ body.dark {
   --danger: #f87171;
   --message-bg: rgba(15, 23, 42, 0.42);
   --focus-ring: 0 0 0 3px rgba(96, 165, 250, 0.34);
+  --text-button-color: #cbd5e1;
 }
 
 body.weather-sunny {
@@ -484,6 +486,53 @@ input {
   text-transform: capitalize;
 }
 
+.hourly-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(96px, 1fr));
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.hourly-card {
+  min-width: 96px;
+  padding: 12px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-card);
+  text-align: center;
+}
+
+.hourly-time {
+  display: block;
+  font-weight: 700;
+  font-size: 0.86rem;
+}
+
+.hourly-temp {
+  display: block;
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: 0.96rem;
+}
+
+.hourly-bar-track {
+  margin: 10px auto 0;
+  width: 16px;
+  height: 58px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.22);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.hourly-bar-fill {
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-hover) 100%);
+}
+
 .history-header {
   display: flex;
   justify-content: space-between;
@@ -499,8 +548,12 @@ input {
 
 .text-button {
   background: transparent;
-  color: var(--primary);
+  color: var(--text-button-color);
   font-weight: 700;
+}
+
+.text-button:hover {
+  color: var(--text);
 }
 
 .history-list {
@@ -933,6 +986,10 @@ body.weather-storm .rain-drop {
 
   .forecast-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .hourly-grid {
+    grid-template-columns: repeat(8, minmax(84px, 1fr));
   }
 
   .current-top {

@@ -8,6 +8,7 @@ const clearHistoryButton = document.querySelector("#clearHistoryButton");
 const favoritesList = document.querySelector("#favoritesList");
 const clearFavoritesButton = document.querySelector("#clearFavoritesButton");
 const forecastGrid = document.querySelector("#forecastGrid");
+const hourlyGrid = document.querySelector("#hourlyGrid");
 const themeToggle = document.querySelector("#themeToggle");
 const locationButton = document.querySelector("#locationButton");
 const unitButtons = document.querySelectorAll(".unit-button");
@@ -98,6 +99,7 @@ locationButton.addEventListener("click", async () => {
         const currentData = weatherPayload.current || weatherPayload;
         displayWeatherInfo(currentData);
         renderForecast(weatherPayload.forecast, currentData.timezone, currentData.dt);
+        renderHourlyForecast(weatherPayload.forecast, currentData.timezone);
         storeRecentSearch(currentData.name);
         showMessage("Showing weather for your current location.");
       } catch (error) {
@@ -160,6 +162,7 @@ async function handleWeatherSearch(city, shouldStore = true) {
     const currentData = weatherPayload.current || weatherPayload;
     displayWeatherInfo(currentData);
     renderForecast(weatherPayload.forecast, currentData.timezone, currentData.dt);
+    renderHourlyForecast(weatherPayload.forecast, currentData.timezone);
 
     if (shouldStore) {
       storeRecentSearch(currentData.name);
@@ -589,6 +592,51 @@ function renderForecast(forecastData, timezoneOffsetSeconds = 0, currentUnixTime
     `;
 
     forecastGrid.appendChild(cardItem);
+  });
+}
+
+function renderHourlyForecast(forecastData, timezoneOffsetSeconds = 0) {
+  hourlyGrid.innerHTML = "";
+
+  if (!forecastData || !Array.isArray(forecastData.list)) {
+    hourlyGrid.innerHTML = `<p class="empty-text">Hourly trend unavailable right now.</p>`;
+    return;
+  }
+
+  const upcomingEntries = forecastData.list.slice(0, 8);
+
+  if (upcomingEntries.length === 0) {
+    hourlyGrid.innerHTML = `<p class="empty-text">Hourly trend unavailable right now.</p>`;
+    return;
+  }
+
+  const temps = upcomingEntries.map((entry) => entry.main.temp);
+  const minTemp = Math.min(...temps);
+  const maxTemp = Math.max(...temps);
+  const range = Math.max(maxTemp - minTemp, 1);
+
+  upcomingEntries.forEach((entry) => {
+    const localDate = new Date((entry.dt + timezoneOffsetSeconds) * 1000);
+    const timeLabel = localDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "UTC",
+    });
+
+    const temp = entry.main.temp;
+    const fillHeight = ((temp - minTemp) / range) * 100;
+
+    const cardItem = document.createElement("article");
+    cardItem.className = "hourly-card";
+    cardItem.innerHTML = `
+      <span class="hourly-time">${timeLabel}</span>
+      <span class="hourly-temp">${Math.round(temp)}${getUnitSymbol()}</span>
+      <div class="hourly-bar-track" aria-hidden="true">
+        <div class="hourly-bar-fill" style="height: ${Math.max(fillHeight, 10)}%"></div>
+      </div>
+    `;
+
+    hourlyGrid.appendChild(cardItem);
   });
 }
 
