@@ -570,7 +570,7 @@ function renderForecast(forecastData, timezoneOffsetSeconds = 0, currentUnixTime
     const {
       entry: {
         weather: [{ id, description }],
-        main: { temp_min, temp_max },
+        main: { temp },
       },
     } = payload;
 
@@ -585,9 +585,7 @@ function renderForecast(forecastData, timezoneOffsetSeconds = 0, currentUnixTime
     cardItem.innerHTML = `
       <span class="forecast-day">${dayName}</span>
       <span class="forecast-emoji">${getWeatherEmoji(id)}</span>
-      <span class="forecast-temp">${Math.round(temp_min)}${getUnitSymbol()} / ${Math.round(
-      temp_max
-    )}${getUnitSymbol()}</span>
+      <span class="forecast-temp">${Math.round(temp)}${getUnitSymbol()}</span>
       <span class="forecast-desc">${description}</span>
     `;
 
@@ -625,6 +623,7 @@ function renderHourlyForecast(forecastData, timezoneOffsetSeconds = 0) {
 
     const temp = entry.main.temp;
     const fillHeight = ((temp - minTemp) / range) * 100;
+    const temperatureColor = getTemperatureColor(temp);
 
     const cardItem = document.createElement("article");
     cardItem.className = "hourly-card";
@@ -632,7 +631,10 @@ function renderHourlyForecast(forecastData, timezoneOffsetSeconds = 0) {
       <span class="hourly-time">${timeLabel}</span>
       <span class="hourly-temp">${Math.round(temp)}${getUnitSymbol()}</span>
       <div class="hourly-bar-track" aria-hidden="true">
-        <div class="hourly-bar-fill" style="height: ${Math.max(fillHeight, 10)}%"></div>
+        <div class="hourly-bar-fill" style="height: ${Math.max(
+          fillHeight,
+          10
+        )}%; --temp-bar-color: ${temperatureColor};"></div>
       </div>
     `;
 
@@ -642,6 +644,53 @@ function renderHourlyForecast(forecastData, timezoneOffsetSeconds = 0) {
 
 function getUnitSymbol() {
   return currentUnit === "metric" ? "°C" : "°F";
+}
+
+function getTemperatureColor(temp) {
+  const colorStops =
+    currentUnit === "metric"
+      ? [
+          { temp: -20, color: [30, 64, 175] },
+          { temp: 0, color: [125, 211, 252] },
+          { temp: 15, color: [250, 204, 21] },
+          { temp: 30, color: [249, 115, 22] },
+          { temp: 40, color: [220, 38, 38] },
+        ]
+      : [
+          { temp: -4, color: [30, 64, 175] },
+          { temp: 32, color: [125, 211, 252] },
+          { temp: 59, color: [250, 204, 21] },
+          { temp: 86, color: [249, 115, 22] },
+          { temp: 104, color: [220, 38, 38] },
+        ];
+
+  if (temp <= colorStops[0].temp) {
+    return rgbToCss(colorStops[0].color);
+  }
+
+  if (temp >= colorStops[colorStops.length - 1].temp) {
+    return rgbToCss(colorStops[colorStops.length - 1].color);
+  }
+
+  for (let i = 0; i < colorStops.length - 1; i += 1) {
+    const start = colorStops[i];
+    const end = colorStops[i + 1];
+
+    if (temp >= start.temp && temp <= end.temp) {
+      const progress = (temp - start.temp) / (end.temp - start.temp);
+      const interpolatedColor = start.color.map((channel, index) =>
+        Math.round(channel + (end.color[index] - channel) * progress)
+      );
+
+      return rgbToCss(interpolatedColor);
+    }
+  }
+
+  return rgbToCss(colorStops[0].color);
+}
+
+function rgbToCss([red, green, blue]) {
+  return `rgb(${red}, ${green}, ${blue})`;
 }
 
 function updateUnitButtons() {

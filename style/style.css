@@ -534,7 +534,12 @@ input {
 .hourly-bar-fill {
   width: 100%;
   border-radius: 999px;
-  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-hover) 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, white 22%, var(--temp-bar-color, var(--primary))) 0%,
+    var(--temp-bar-color, var(--primary)) 100%
+  );
+  box-shadow: 0 0 18px color-mix(in srgb, transparent 55%, var(--temp-bar-color, var(--primary)));
 }
 
 .history-header {
