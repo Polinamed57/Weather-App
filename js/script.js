@@ -1,3 +1,21 @@
+// ── Session cache ──────────────────────────────────────────────
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+function getCached(key) {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const { ts, data } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL_MS) { sessionStorage.removeItem(key); return null; }
+    return data;
+  } catch { return null; }
+}
+
+function setCached(key, data) {
+  try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch {}
+}
+// ───────────────────────────────────────────────────────────────
+
 const weatherForm = document.querySelector("#weatherForm");
 const cityInput = document.querySelector("#cityInput");
 const submitButton = document.querySelector("#submitButton");
@@ -18,12 +36,12 @@ const descDisplay = document.querySelector("#descDisplay");
 const weatherEmoji = document.querySelector("#weatherEmoji");
 const tempDisplay = document.querySelector("#tempDisplay");
 const feelsLikeDisplay = document.querySelector("#feelsLikeDisplay");
+const feelsLikeCardDisplay = document.querySelector("#feelsLikeCardDisplay");
 const humidityDisplay = document.querySelector("#humidityDisplay");
 const windDisplay = document.querySelector("#windDisplay");
 const pressureDisplay = document.querySelector("#pressureDisplay");
 const minMaxDisplay = document.querySelector("#minMaxDisplay");
 const visibilityDisplay = document.querySelector("#visibilityDisplay");
-const unitDisplay = document.querySelector("#unitDisplay");
 const sunriseDisplay = document.querySelector("#sunriseDisplay");
 const sunsetDisplay = document.querySelector("#sunsetDisplay");
 const lastUpdatedDisplay = document.querySelector("#lastUpdatedDisplay");
@@ -178,6 +196,10 @@ async function handleWeatherSearch(city, shouldStore = true) {
 }
 
 async function getWeatherData(city) {
+  const cacheKey = `weather:${city.toLowerCase()}:${currentUnit}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
   const response = await fetch(
     `/api/weather?city=${encodeURIComponent(city)}&unit=${currentUnit}&includeForecast=true`
   );
@@ -194,10 +216,15 @@ async function getWeatherData(city) {
     throw new Error(data.error || "Unable to fetch weather data.");
   }
 
+  setCached(cacheKey, data);
   return data;
 }
 
 async function getWeatherByCoordinates(latitude, longitude) {
+  const cacheKey = `weather:coords:${latitude.toFixed(2)},${longitude.toFixed(2)}:${currentUnit}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
   const response = await fetch(
     `/api/weather?lat=${latitude}&lon=${longitude}&unit=${currentUnit}&includeForecast=true`
   );
@@ -214,6 +241,7 @@ async function getWeatherByCoordinates(latitude, longitude) {
     throw new Error(data.error || "Unable to fetch weather for your location.");
   }
 
+  setCached(cacheKey, data);
   return data;
 }
 
@@ -250,12 +278,43 @@ function displayWeatherInfo(data) {
   )}${getUnitSymbol()}`;
 
   visibilityDisplay.textContent = formatVisibility(visibility);
-  unitDisplay.textContent = currentUnit === "metric" ? "Metric (°C)" : "Imperial (°F)";
+  if (feelsLikeCardDisplay) feelsLikeCardDisplay.textContent = `${Math.round(feels_like)}${getUnitSymbol()}`;
   sunriseDisplay.textContent = formatUnixTime(sunrise, timezone);
   sunsetDisplay.textContent = formatUnixTime(sunset, timezone);
+  updateSunArc(sunrise, sunset);
 
   card.classList.remove("hidden");
   restartRevealAnimation();
+}
+
+function updateSunArc(sunriseUnix, sunsetUnix) {
+  const progress = document.getElementById("sunArcProgress");
+  const dot = document.getElementById("sunDot");
+  if (!progress || !dot) return;
+
+  const now = Math.floor(Date.now() / 1000);
+  const totalDaySeconds = sunsetUnix - sunriseUnix;
+  const elapsedSeconds = now - sunriseUnix;
+  const ratio = Math.min(Math.max(elapsedSeconds / totalDaySeconds, 0), 1);
+
+  // Full arc path length ~290
+  const arcLength = 290;
+  const offset = arcLength - ratio * arcLength;
+  progress.style.strokeDashoffset = offset;
+
+  // Position the sun dot along the arc using quadratic bezier formula
+  // P(t) = (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
+  const t = ratio;
+  const p0x = 10, p0y = 72;
+  const p1x = 130, p1y = -10;
+  const p2x = 250, p2y = 72;
+  const dotX = (1 - t) * (1 - t) * p0x + 2 * (1 - t) * t * p1x + t * t * p2x;
+  const dotY = (1 - t) * (1 - t) * p0y + 2 * (1 - t) * t * p1y + t * t * p2y;
+  dot.setAttribute("cx", dotX.toFixed(1));
+  dot.setAttribute("cy", dotY.toFixed(1));
+
+  // Hide dot if before sunrise or after sunset
+  dot.style.opacity = (ratio <= 0 || ratio >= 1) ? "0.3" : "1";
 }
 
 function restartRevealAnimation() {
@@ -438,6 +497,43 @@ function setLoadingState(isLoading, buttonText = "Search") {
   locationButton.disabled = isLoading;
   weatherForm.setAttribute("aria-busy", isLoading ? "true" : "false");
   submitButton.textContent = isLoading ? buttonText : "Search";
+
+  if (isLoading) {
+    showSkeleton();
+  } else {
+    hideSkeleton();
+  }
+}
+
+function showSkeleton() {
+  let skeleton = document.getElementById("weatherSkeleton");
+  if (!skeleton) {
+    skeleton = document.createElement("div");
+    skeleton.id = "weatherSkeleton";
+    skeleton.className = "skeleton-panel";
+    skeleton.setAttribute("aria-hidden", "true");
+    skeleton.innerHTML = `
+      <div class="skeleton-main">
+        <div class="skeleton-block skeleton" style="width:55%;height:28px;margin-bottom:10px"></div>
+        <div class="skeleton-block skeleton" style="width:35%;height:18px;margin-bottom:24px"></div>
+        <div class="skeleton-block skeleton" style="width:40%;height:72px;margin-bottom:10px"></div>
+        <div class="skeleton-block skeleton" style="width:50%;height:16px"></div>
+      </div>
+      <div class="skeleton-grid">
+        ${Array.from({ length: 6 }, () =>
+          `<div class="skeleton-card skeleton"></div>`
+        ).join("")}
+      </div>
+    `;
+    card.parentNode.insertBefore(skeleton, card);
+  }
+  skeleton.classList.remove("hidden");
+  card.classList.add("hidden");
+}
+
+function hideSkeleton() {
+  const skeleton = document.getElementById("weatherSkeleton");
+  if (skeleton) skeleton.classList.add("hidden");
 }
 
 function storeRecentSearch(city) {
@@ -571,6 +667,7 @@ function renderForecast(forecastData, timezoneOffsetSeconds = 0, currentUnixTime
       entry: {
         weather: [{ id, description }],
         main: { temp },
+        pop,
       },
     } = payload;
 
@@ -587,6 +684,7 @@ function renderForecast(forecastData, timezoneOffsetSeconds = 0, currentUnixTime
       <span class="forecast-emoji">${getWeatherEmoji(id)}</span>
       <span class="forecast-temp">${Math.round(temp)}${getUnitSymbol()}</span>
       <span class="forecast-desc">${description}</span>
+      ${pop > 0 ? `<span class="forecast-pop">💧 ${Math.round(pop * 100)}%</span>` : ""}
     `;
 
     forecastGrid.appendChild(cardItem);

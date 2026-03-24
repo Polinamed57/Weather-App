@@ -83,15 +83,24 @@
             <p class="last-updated" id="lastUpdatedDisplay"></p>
           </div>
 
-          <div class="sun-times">
-            <div class="sun-time-box">
-              <span class="sun-time-label">Sunrise</span>
-              <span class="sun-time-value" id="sunriseDisplay"></span>
+          <div class="sun-arc-block">
+            <div class="sun-arc-times">
+              <div class="sun-arc-label-group">
+                <span class="sun-time-label">☀️ Sunrise</span>
+                <span class="sun-time-value" id="sunriseDisplay"></span>
+              </div>
+              <div class="sun-arc-label-group sun-arc-label-right">
+                <span class="sun-time-label">🌇 Sunset</span>
+                <span class="sun-time-value" id="sunsetDisplay"></span>
+              </div>
             </div>
-
-            <div class="sun-time-box">
-              <span class="sun-time-label">Sunset</span>
-              <span class="sun-time-value" id="sunsetDisplay"></span>
+            <div class="sun-arc-wrap" aria-hidden="true">
+              <svg class="sun-arc-svg" viewBox="0 0 260 80" xmlns="http://www.w3.org/2000/svg">
+                <path id="sunArcTrack" d="M10 72 Q130 -10 250 72" fill="none" stroke-width="2" stroke-linecap="round"/>
+                <path id="sunArcProgress" d="M10 72 Q130 -10 250 72" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="290" stroke-dashoffset="290"/>
+                <circle id="sunDot" cx="10" cy="72" r="6"/>
+                <line x1="4" y1="75" x2="256" y2="75" stroke-width="1"/>
+              </svg>
             </div>
           </div>
         </div>
@@ -123,8 +132,8 @@
           </article>
 
           <article class="detail-card reveal-delay-6">
-            <span class="detail-label">Units</span>
-            <span class="detail-value" id="unitDisplay"></span>
+            <span class="detail-label">Feels Like</span>
+            <span class="detail-value" id="feelsLikeCardDisplay"></span>
           </article>
         </div>
       </section>
