@@ -367,31 +367,120 @@ input {
   font-size: 0.9rem;
 }
 
-.sun-times {
+/* ── Sun arc ──────────────────────────────────────────────────── */
+.sun-arc-block {
   margin-top: 28px;
+}
+
+.sun-arc-times {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.sun-arc-label-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sun-arc-label-right {
+  text-align: right;
+}
+
+.sun-arc-wrap {
+  width: 100%;
+}
+
+.sun-arc-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+#sunArcTrack {
+  stroke: rgba(148, 163, 184, 0.25);
+}
+
+#sunArcProgress {
+  stroke: #f59e0b;
+  transition: stroke-dashoffset 1s ease;
+}
+
+#sunDot {
+  fill: #fbbf24;
+  filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.7));
+  transition: cx 1s ease, cy 1s ease;
+}
+
+.sun-arc-svg line {
+  stroke: rgba(148, 163, 184, 0.2);
+}
+
+/* ── Forecast precipitation % ──────────────────────────────────── */
+.forecast-pop {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.82rem;
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+body.dark .forecast-pop {
+  color: #93c5fd;
+}
+
+/* ── Loading skeleton ──────────────────────────────────────────── */
+.skeleton-panel {
+  margin-bottom: 22px;
+}
+
+.skeleton-main {
+  padding: 26px;
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  background: var(--surface-card);
+  margin-bottom: 18px;
+  min-height: 200px;
+}
+
+.skeleton-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
 }
 
-.sun-time-box {
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--border);
+.skeleton-card {
+  height: 122px;
+  border-radius: 22px;
 }
 
-.sun-time-label {
+.skeleton-block {
+  border-radius: 10px;
   display: block;
-  color: var(--muted);
-  font-size: 0.9rem;
-  margin-bottom: 8px;
 }
 
-.sun-time-value {
-  font-weight: 700;
-  font-size: 1.05rem;
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-card) 25%,
+    var(--surface-strong) 50%,
+    var(--surface-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none !important; }
+}
+
+
 
 .weather-details {
   display: grid;
