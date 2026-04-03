@@ -780,22 +780,22 @@ function getTemperatureColor(temp) {
   const colorStops =
     currentUnit === "metric"
       ? [
-          { temp: -20, color: [15,  40,  140] },
+          { temp: -20, color: [30,  64,  175] },
           { temp: -5,  color: [59,  130, 246] },
-          { temp: 5,   color: [186, 224, 252] },
-          { temp: 9,   color: [230, 242, 252] },
-          { temp: 10,  color: [255, 247, 180] },
-          { temp: 20,  color: [250, 204, 21]  },
+          { temp: 0,   color: [96,  165, 250] },
+          { temp: 10,  color: [147, 210, 250] },
+          { temp: 11,  color: [255, 220, 60]  },
+          { temp: 22,  color: [250, 170, 20]  },
           { temp: 28,  color: [249, 115, 22]  },
           { temp: 38,  color: [185, 28,  28]  },
         ]
       : [
-          { temp: -4,  color: [15,  40,  140] },
+          { temp: -4,  color: [30,  64,  175] },
           { temp: 23,  color: [59,  130, 246] },
-          { temp: 41,  color: [186, 224, 252] },
-          { temp: 48,  color: [230, 242, 252] },
-          { temp: 50,  color: [255, 247, 180] },
-          { temp: 68,  color: [250, 204, 21]  },
+          { temp: 32,  color: [96,  165, 250] },
+          { temp: 50,  color: [147, 210, 250] },
+          { temp: 52,  color: [255, 220, 60]  },
+          { temp: 72,  color: [250, 170, 20]  },
           { temp: 82,  color: [249, 115, 22]  },
           { temp: 100, color: [185, 28,  28]  },
         ];
