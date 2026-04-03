@@ -46,6 +46,8 @@ const favoriteToggle = document.querySelector("#favoriteToggle");
 const rainLayer = document.querySelector(".rain-layer");
 const snowLayer = document.querySelector(".snow-layer");
 const sunLayer = document.querySelector(".sun-layer");
+const sunArcProgress = document.querySelector("#sunArcProgress");
+const sunDot = document.querySelector("#sunDot");
 
 let currentUnit = localStorage.getItem("weatherUnit") || "metric";
 let recentSearches = JSON.parse(localStorage.getItem("recentSearches")) || [];
@@ -103,7 +105,7 @@ locationButton.addEventListener("click", async () => {
     async (position) => {
       try {
         const { latitude, longitude } = position.coords;
-        const weatherPayload = await getWeatherByCoordinates(latitude, longitude);
+        const weatherPayload = await fetchWeather({ lat: latitude, lon: longitude });
         const currentData = weatherPayload.current || weatherPayload;
         cityInput.value = currentData.name;
         displayWeatherInfo(currentData);
@@ -134,7 +136,7 @@ favoriteToggle.addEventListener("click", () => {
     );
     showMessage(`${currentWeatherCity} removed from favorites.`);
   } else {
-    favoriteCities = [currentWeatherCity, ...favoriteCities].slice(0, 8);
+    favoriteCities = [currentWeatherCity, ...favoriteCities].slice(0, 5);
     showMessage(`${currentWeatherCity} added to favorites.`);
   }
 
@@ -167,7 +169,7 @@ async function handleWeatherSearch(city, shouldStore = true) {
     setLoadingState(true, "Loading weather data...");
     hideMessage();
 
-    const weatherPayload = await getWeatherData(city);
+    const weatherPayload = await fetchWeather({ city });
     const currentData = weatherPayload.current || weatherPayload;
     displayWeatherInfo(currentData);
     renderForecast(weatherPayload.forecast, currentData.timezone, currentData.dt);
@@ -186,50 +188,32 @@ async function handleWeatherSearch(city, shouldStore = true) {
   }
 }
 
-async function getWeatherData(city) {
-  const cacheKey = `weather:${city.toLowerCase()}:${currentUnit}`;
+async function fetchWeather({ city, lat, lon }) {
+  const cacheKey = city
+    ? `weather:${city.toLowerCase()}:${currentUnit}`
+    : `weather:coords:${Number(lat).toFixed(2)},${Number(lon).toFixed(2)}:${currentUnit}`;
+
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
-  const response = await fetch(
-    `/api/weather?city=${encodeURIComponent(city)}&unit=${currentUnit}&includeForecast=true`
-  );
+  const params = new URLSearchParams({ unit: currentUnit, includeForecast: "true" });
+  if (city) {
+    params.set("city", city);
+  } else {
+    params.set("lat", lat);
+    params.set("lon", lon);
+  }
+
+  const response = await fetch(`/api/weather?${params}`);
 
   const contentType = response.headers.get("content-type");
-
   if (!contentType || !contentType.includes("application/json")) {
     throw new Error("Weather API route is not working correctly.");
   }
 
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Unable to fetch weather data.");
-  }
-
-  setCached(cacheKey, data);
-  return data;
-}
-
-async function getWeatherByCoordinates(latitude, longitude) {
-  const cacheKey = `weather:coords:${latitude.toFixed(2)},${longitude.toFixed(2)}:${currentUnit}`;
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
-
-  const response = await fetch(
-    `/api/weather?lat=${latitude}&lon=${longitude}&unit=${currentUnit}&includeForecast=true`
-  );
-
-  const contentType = response.headers.get("content-type");
-
-  if (!contentType || !contentType.includes("application/json")) {
-    throw new Error("Weather API route is not working correctly.");
-  }
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Unable to fetch weather for your location.");
   }
 
   setCached(cacheKey, data);
@@ -278,9 +262,9 @@ function displayWeatherInfo(data) {
 }
 
 function updateSunArc(sunriseUnix, sunsetUnix) {
-  const progress = document.getElementById("sunArcProgress");
-  const dot = document.getElementById("sunDot");
-  if (!progress || !dot) return;
+  if (!sunArcProgress || !sunDot) return;
+  const progress = sunArcProgress;
+  const dot = sunDot;
 
   const now = Math.floor(Date.now() / 1000);
   const totalDaySeconds = sunsetUnix - sunriseUnix;
@@ -309,7 +293,7 @@ function updateSunArc(sunriseUnix, sunsetUnix) {
 
 function restartRevealAnimation() {
   card.classList.remove("animate-in");
-  void card.offsetWidth;
+  void card.offsetWidth; // triggers reflow to restart CSS animation
   card.classList.add("animate-in");
 }
 
@@ -510,7 +494,7 @@ function showSkeleton() {
         <div class="skeleton-block skeleton" style="width:50%;height:16px"></div>
       </div>
       <div class="skeleton-grid">
-        ${Array.from({ length: 6 }, () =>
+        ${Array.from({ length: 4 }, () =>
           `<div class="skeleton-card skeleton"></div>`
         ).join("")}
       </div>
