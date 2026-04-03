@@ -1102,9 +1102,6 @@ body.weather-storm .rain-drop {
     font-size: 3.6rem;
   }
 
-  .sun-times {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

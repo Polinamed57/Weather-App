@@ -54,7 +54,14 @@ export default async function handler(req, res) {
       city
     )}&appid=${apiKey}&units=${unit}`;
   } else if (lat && lon) {
-    apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=${unit}`;
+    const parsedLat = parseFloat(lat);
+    const parsedLon = parseFloat(lon);
+
+    if (isNaN(parsedLat) || isNaN(parsedLon) || parsedLat < -90 || parsedLat > 90 || parsedLon < -180 || parsedLon > 180) {
+      return res.status(400).json({ error: "Invalid coordinates." });
+    }
+
+    apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${parsedLat}&lon=${parsedLon}&appid=${apiKey}&units=${unit}`;
   } else {
     return res.status(400).json({ error: "City or coordinates are required." });
   }
