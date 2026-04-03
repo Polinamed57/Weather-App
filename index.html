@@ -34,18 +34,21 @@
         </div>
       </header>
 
-      <form class="weatherForm search-bar" id="weatherForm" novalidate>
-        <label for="cityInput" class="sr-only">City name</label>
-        <input
-          type="text"
-          class="cityInput"
-          id="cityInput"
-          placeholder="Search for a city..."
-          autocomplete="off"
-          autofocus
-        />
-        <button type="submit" id="submitButton">Search</button>
-      </form>
+      <div class="search-wrap">
+        <form class="weatherForm search-bar" id="weatherForm" novalidate>
+          <label for="cityInput" class="sr-only">City name</label>
+          <input
+            type="text"
+            class="cityInput"
+            id="cityInput"
+            placeholder="Search for a city..."
+            autocomplete="off"
+            autofocus
+          />
+          <button type="submit" id="submitButton">Search</button>
+        </form>
+        <div class="search-dropdown hidden" id="searchDropdown"></div>
+      </div>
 
       <div class="toolbar">
         <div class="unit-toggle" role="group" aria-label="Temperature unit">
@@ -86,11 +89,11 @@
           <div class="sun-arc-block">
             <div class="sun-arc-times">
               <div class="sun-arc-label-group">
-                <span class="sun-time-label">☀️ Sunrise</span>
+                <span class="sun-time-label"><svg class="sun-label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="2" y1="18" x2="4" y2="18"/><line x1="20" y1="18" x2="22" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg> Sunrise</span>
                 <span class="sun-time-value" id="sunriseDisplay"></span>
               </div>
               <div class="sun-arc-label-group sun-arc-label-right">
-                <span class="sun-time-label">🌇 Sunset</span>
+                <span class="sun-time-label"><svg class="sun-label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="2" y1="18" x2="4" y2="18"/><line x1="20" y1="18" x2="22" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="16 5 12 9 8 5"/></svg> Sunset</span>
                 <span class="sun-time-value" id="sunsetDisplay"></span>
               </div>
             </div>
@@ -107,27 +110,42 @@
 
         <div class="weather-details">
           <article class="detail-card reveal-delay-1">
-            <span class="detail-label">Humidity</span>
+            <span class="detail-label">
+              <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+              Humidity
+            </span>
             <span class="detail-value" id="humidityDisplay"></span>
           </article>
 
           <article class="detail-card reveal-delay-2">
-            <span class="detail-label">Wind</span>
+            <span class="detail-label">
+              <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+              Wind
+            </span>
             <span class="detail-value" id="windDisplay"></span>
           </article>
 
           <article class="detail-card reveal-delay-3">
-            <span class="detail-label">Pressure</span>
+            <span class="detail-label">
+              <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12a10 10 0 1 0 20 0"/><path d="M12 12l3-4"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg>
+              Pressure
+            </span>
             <span class="detail-value" id="pressureDisplay"></span>
           </article>
 
           <article class="detail-card reveal-delay-4">
-            <span class="detail-label">Min / Max</span>
+            <span class="detail-label">
+              <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+              Min / Max
+            </span>
             <span class="detail-value" id="minMaxDisplay"></span>
           </article>
 
           <article class="detail-card reveal-delay-5">
-            <span class="detail-label">Visibility</span>
+            <span class="detail-label">
+              <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Visibility
+            </span>
             <span class="detail-value" id="visibilityDisplay"></span>
           </article>
 
@@ -149,31 +167,6 @@
         </div>
       </section>
 
-      <section class="history-section">
-        <div class="history-header">
-          <h3>Favorite Cities</h3>
-          <button type="button" id="clearFavoritesButton" class="text-button">
-            Clear
-          </button>
-        </div>
-
-        <div class="history-list" id="favoritesList" aria-label="Favorite cities">
-          <p class="empty-text">No favorite cities yet.</p>
-        </div>
-      </section>
-
-      <section class="history-section">
-        <div class="history-header">
-          <h3>Recent Searches</h3>
-          <button type="button" id="clearHistoryButton" class="text-button">
-            Clear
-          </button>
-        </div>
-
-        <div class="history-list" id="historyList" aria-label="Recent city searches">
-          <p class="empty-text">No recent searches yet.</p>
-        </div>
-      </section>
     </section>
   </main>
 

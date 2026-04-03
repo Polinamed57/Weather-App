@@ -508,6 +508,9 @@ body.dark .forecast-pop {
 }
 
 .detail-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: var(--muted);
   font-size: 0.94rem;
 }
@@ -1102,6 +1105,139 @@ body.weather-storm .rain-drop {
     font-size: 3.6rem;
   }
 
+}
+
+/* ── Search dropdown ───────────────────────────────────────────── */
+.search-wrap {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.search-wrap .search-bar {
+  margin-bottom: 0;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  padding: 6px 0;
+}
+
+.dropdown-section + .dropdown-section {
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+.dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 14px 4px;
+}
+
+.dropdown-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.dropdown-clear {
+  font-size: 0.8rem;
+  padding: 0;
+}
+
+.dropdown-row {
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+}
+
+.dropdown-item {
+  flex: 1;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dropdown-item:hover {
+  background: var(--surface-card);
+  transform: none;
+  opacity: 1;
+}
+
+.dropdown-remove {
+  padding: 5px 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  border-radius: 8px;
+  transition: color 0.15s ease;
+}
+
+.dropdown-remove:hover {
+  color: var(--danger);
+  transform: none;
+  opacity: 1;
+}
+
+/* ── Detail card icons ─────────────────────────────────────────── */
+.detail-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  stroke: var(--muted);
+}
+
+.detail-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+/* ── Sun label icons ───────────────────────────────────────────── */
+.sun-time-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.88rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.sun-label-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  stroke: var(--muted);
+}
+
+/* ── Forecast range ────────────────────────────────────────────── */
+.forecast-range {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 600;
 }
 
 @media (prefers-reduced-motion: reduce) {
