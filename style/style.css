@@ -1123,13 +1123,17 @@ body.weather-storm .rain-drop {
   left: 0;
   right: 0;
   z-index: 200;
-  background: var(--surface-strong);
-  border: 1px solid var(--border);
+  background: rgba(235, 241, 255, 0.97);
+  border: 1px solid rgba(200, 215, 255, 0.6);
   border-radius: 18px;
-  backdrop-filter: blur(18px);
   box-shadow: var(--shadow);
   overflow: hidden;
   padding: 6px 0;
+}
+
+body.dark .search-dropdown {
+  background: rgba(10, 18, 38, 0.97);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .dropdown-section + .dropdown-section {
