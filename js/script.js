@@ -65,6 +65,7 @@ if (lastSearchedCity) {
 
 weatherForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  searchDropdown.classList.add("hidden");
 
   const city = cityInput.value.trim();
 
@@ -779,18 +780,24 @@ function getTemperatureColor(temp) {
   const colorStops =
     currentUnit === "metric"
       ? [
-          { temp: -20, color: [30, 64, 175] },
-          { temp: 0,   color: [125, 211, 252] },
-          { temp: 10,  color: [250, 204, 21] },
-          { temp: 25,  color: [249, 115, 22] },
-          { temp: 38,  color: [220, 38, 38] },
+          { temp: -20, color: [30,  64,  175] },
+          { temp: -5,  color: [59,  130, 246] },
+          { temp: 0,   color: [96,  165, 250] },
+          { temp: 10,  color: [147, 210, 250] },
+          { temp: 11,  color: [255, 220, 60]  },
+          { temp: 22,  color: [250, 170, 20]  },
+          { temp: 28,  color: [249, 115, 22]  },
+          { temp: 38,  color: [185, 28,  28]  },
         ]
       : [
-          { temp: -4,  color: [30, 64, 175] },
-          { temp: 32,  color: [125, 211, 252] },
-          { temp: 50,  color: [250, 204, 21] },
-          { temp: 77,  color: [249, 115, 22] },
-          { temp: 100, color: [220, 38, 38] },
+          { temp: -4,  color: [30,  64,  175] },
+          { temp: 23,  color: [59,  130, 246] },
+          { temp: 32,  color: [96,  165, 250] },
+          { temp: 50,  color: [147, 210, 250] },
+          { temp: 52,  color: [255, 220, 60]  },
+          { temp: 72,  color: [250, 170, 20]  },
+          { temp: 82,  color: [249, 115, 22]  },
+          { temp: 100, color: [185, 28,  28]  },
         ];
 
   if (temp <= colorStops[0].temp) {
