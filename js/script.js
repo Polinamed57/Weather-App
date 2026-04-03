@@ -104,6 +104,7 @@ locationButton.addEventListener("click", async () => {
         const { latitude, longitude } = position.coords;
         const weatherPayload = await getWeatherByCoordinates(latitude, longitude);
         const currentData = weatherPayload.current || weatherPayload;
+        cityInput.value = currentData.name;
         displayWeatherInfo(currentData);
         renderForecast(weatherPayload.forecast, currentData.timezone, currentData.dt);
         renderHourlyForecast(weatherPayload.forecast, currentData.timezone);
@@ -534,7 +535,7 @@ function storeRecentSearch(city) {
     ...recentSearches.filter(
       (item) => item.toLowerCase() !== normalizedCity.toLowerCase()
     ),
-  ].slice(0, 6);
+  ].slice(0, 5);
 
   localStorage.setItem("recentSearches", JSON.stringify(recentSearches));
 }
