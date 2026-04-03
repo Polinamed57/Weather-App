@@ -36,7 +36,6 @@ const descDisplay = document.querySelector("#descDisplay");
 const weatherEmoji = document.querySelector("#weatherEmoji");
 const tempDisplay = document.querySelector("#tempDisplay");
 const feelsLikeDisplay = document.querySelector("#feelsLikeDisplay");
-const feelsLikeCardDisplay = document.querySelector("#feelsLikeCardDisplay");
 const humidityDisplay = document.querySelector("#humidityDisplay");
 const windDisplay = document.querySelector("#windDisplay");
 const pressureDisplay = document.querySelector("#pressureDisplay");
@@ -278,7 +277,6 @@ function displayWeatherInfo(data) {
   )}${getUnitSymbol()}`;
 
   visibilityDisplay.textContent = formatVisibility(visibility);
-  if (feelsLikeCardDisplay) feelsLikeCardDisplay.textContent = `${Math.round(feels_like)}${getUnitSymbol()}`;
   sunriseDisplay.textContent = formatUnixTime(sunrise, timezone);
   sunsetDisplay.textContent = formatUnixTime(sunset, timezone);
   updateSunArc(sunrise, sunset);
