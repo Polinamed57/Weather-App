@@ -781,23 +781,19 @@ function getTemperatureColor(temp) {
     currentUnit === "metric"
       ? [
           { temp: -20, color: [30,  64,  175] },
-          { temp: -5,  color: [59,  130, 246] },
-          { temp: 0,   color: [96,  165, 250] },
-          { temp: 10,  color: [147, 210, 250] },
-          { temp: 11,  color: [255, 220, 60]  },
-          { temp: 22,  color: [250, 170, 20]  },
-          { temp: 28,  color: [249, 115, 22]  },
-          { temp: 38,  color: [185, 28,  28]  },
+          { temp: 0,   color: [93,  175, 245] },
+          { temp: 10,  color: [170, 200, 175] },
+          { temp: 18,  color: [245, 210, 60]  },
+          { temp: 26,  color: [249, 140, 25]  },
+          { temp: 36,  color: [200, 35,  35]  },
         ]
       : [
           { temp: -4,  color: [30,  64,  175] },
-          { temp: 23,  color: [59,  130, 246] },
-          { temp: 32,  color: [96,  165, 250] },
-          { temp: 50,  color: [147, 210, 250] },
-          { temp: 52,  color: [255, 220, 60]  },
-          { temp: 72,  color: [250, 170, 20]  },
-          { temp: 82,  color: [249, 115, 22]  },
-          { temp: 100, color: [185, 28,  28]  },
+          { temp: 32,  color: [93,  175, 245] },
+          { temp: 50,  color: [170, 200, 175] },
+          { temp: 64,  color: [245, 210, 60]  },
+          { temp: 79,  color: [249, 140, 25]  },
+          { temp: 97,  color: [200, 35,  35]  },
         ];
 
   if (temp <= colorStops[0].temp) {
