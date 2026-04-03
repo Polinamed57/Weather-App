@@ -21,10 +21,7 @@ const cityInput = document.querySelector("#cityInput");
 const submitButton = document.querySelector("#submitButton");
 const card = document.querySelector("#card");
 const message = document.querySelector("#message");
-const historyList = document.querySelector("#historyList");
-const clearHistoryButton = document.querySelector("#clearHistoryButton");
-const favoritesList = document.querySelector("#favoritesList");
-const clearFavoritesButton = document.querySelector("#clearFavoritesButton");
+const searchDropdown = document.querySelector("#searchDropdown");
 const forecastGrid = document.querySelector("#forecastGrid");
 const hourlyGrid = document.querySelector("#hourlyGrid");
 const themeToggle = document.querySelector("#themeToggle");
@@ -59,8 +56,6 @@ let currentWeatherCity = "";
 
 applyTheme();
 updateUnitButtons();
-renderRecentSearches();
-renderFavoriteCities();
 clearWeatherParticles();
 
 if (lastSearchedCity) {
@@ -81,17 +76,12 @@ weatherForm.addEventListener("submit", async (event) => {
   await handleWeatherSearch(city);
 });
 
-clearHistoryButton.addEventListener("click", () => {
-  recentSearches = [];
-  localStorage.setItem("recentSearches", JSON.stringify(recentSearches));
-  renderRecentSearches();
+cityInput.addEventListener("focus", () => {
+  renderDropdown();
 });
 
-clearFavoritesButton.addEventListener("click", () => {
-  favoriteCities = [];
-  localStorage.setItem("favoriteCities", JSON.stringify(favoriteCities));
-  renderFavoriteCities();
-  updateFavoriteToggleButton();
+cityInput.addEventListener("blur", () => {
+  setTimeout(() => searchDropdown.classList.add("hidden"), 150);
 });
 
 themeToggle.addEventListener("click", () => {
@@ -147,7 +137,7 @@ favoriteToggle.addEventListener("click", () => {
   }
 
   localStorage.setItem("favoriteCities", JSON.stringify(favoriteCities));
-  renderFavoriteCities();
+  renderDropdown();
   updateFavoriteToggleButton();
 });
 
@@ -547,71 +537,100 @@ function storeRecentSearch(city) {
   ].slice(0, 6);
 
   localStorage.setItem("recentSearches", JSON.stringify(recentSearches));
-  renderRecentSearches();
 }
 
-function renderRecentSearches() {
-  historyList.innerHTML = "";
+function renderDropdown() {
+  const hasFavorites = favoriteCities.length > 0;
+  const hasRecent = recentSearches.length > 0;
 
-  if (recentSearches.length === 0) {
-    historyList.innerHTML = `<p class="empty-text">No recent searches yet.</p>`;
+  if (!hasFavorites && !hasRecent) {
+    searchDropdown.classList.add("hidden");
     return;
   }
 
-  recentSearches.forEach((city) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = city;
-    button.className = "history-chip";
+  searchDropdown.innerHTML = "";
 
-    button.addEventListener("click", async () => {
-      cityInput.value = city;
-      await handleWeatherSearch(city, false);
-    });
-
-    historyList.appendChild(button);
-  });
-}
-
-function renderFavoriteCities() {
-  favoritesList.innerHTML = "";
-
-  if (favoriteCities.length === 0) {
-    favoritesList.innerHTML = `<p class="empty-text">No favorite cities yet.</p>`;
-    return;
+  if (hasFavorites) {
+    searchDropdown.appendChild(buildDropdownSection("Favorites", favoriteCities, true));
   }
 
-  favoriteCities.forEach((city) => {
-    const wrap = document.createElement("div");
-    wrap.className = "favorite-chip-wrap";
+  if (hasRecent) {
+    searchDropdown.appendChild(buildDropdownSection("Recent", recentSearches, false));
+  }
 
-    const cityButton = document.createElement("button");
-    cityButton.type = "button";
-    cityButton.textContent = city;
-    cityButton.className = "history-chip";
-    cityButton.addEventListener("click", async () => {
-      cityInput.value = city;
-      await handleWeatherSearch(city, false);
-    });
+  searchDropdown.classList.remove("hidden");
+}
 
-    const removeButton = document.createElement("button");
-    removeButton.type = "button";
-    removeButton.className = "chip-remove";
-    removeButton.setAttribute("aria-label", `Remove ${city} from favorites`);
-    removeButton.textContent = "×";
-    removeButton.addEventListener("click", () => {
-      favoriteCities = favoriteCities.filter(
-        (item) => item.toLowerCase() !== city.toLowerCase()
-      );
+function buildDropdownSection(title, cities, isFavorites) {
+  const section = document.createElement("div");
+  section.className = "dropdown-section";
+
+  const header = document.createElement("div");
+  header.className = "dropdown-header";
+
+  const label = document.createElement("span");
+  label.className = "dropdown-label";
+  label.textContent = title;
+
+  const clearBtn = document.createElement("button");
+  clearBtn.type = "button";
+  clearBtn.className = "text-button dropdown-clear";
+  clearBtn.textContent = "Clear";
+  clearBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (isFavorites) {
+      favoriteCities = [];
       localStorage.setItem("favoriteCities", JSON.stringify(favoriteCities));
-      renderFavoriteCities();
       updateFavoriteToggleButton();
+    } else {
+      recentSearches = [];
+      localStorage.setItem("recentSearches", JSON.stringify(recentSearches));
+    }
+    renderDropdown();
+  });
+
+  header.appendChild(label);
+  header.appendChild(clearBtn);
+  section.appendChild(header);
+
+  cities.forEach((city) => {
+    const row = document.createElement("div");
+    row.className = "dropdown-row";
+
+    const cityBtn = document.createElement("button");
+    cityBtn.type = "button";
+    cityBtn.className = "dropdown-item";
+    cityBtn.textContent = city;
+    cityBtn.addEventListener("click", async () => {
+      cityInput.value = city;
+      searchDropdown.classList.add("hidden");
+      await handleWeatherSearch(city, false);
     });
 
-    wrap.appendChild(cityButton);
-    wrap.appendChild(removeButton);
-    favoritesList.appendChild(wrap);
+    row.appendChild(cityBtn);
+
+    if (isFavorites) {
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "dropdown-remove";
+      removeBtn.setAttribute("aria-label", `Remove ${city} from favorites`);
+      removeBtn.textContent = "×";
+      removeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        favoriteCities = favoriteCities.filter(
+          (item) => item.toLowerCase() !== city.toLowerCase()
+        );
+        localStorage.setItem("favoriteCities", JSON.stringify(favoriteCities));
+        updateFavoriteToggleButton();
+        renderDropdown();
+      });
+      row.appendChild(removeBtn);
+    }
+
+    section.appendChild(row);
   });
+
+  return section;
 }
 
 function isFavoriteCity(city) {
@@ -636,12 +655,22 @@ function renderForecast(forecastData, timezoneOffsetSeconds = 0, currentUnixTime
 
   const currentLocalDate = getLocalDateLabel(currentUnixTime, timezoneOffsetSeconds);
   const bestPerDay = new Map();
+  const tempRangePerDay = new Map();
 
   forecastData.list.forEach((entry) => {
     const localDate = new Date((entry.dt + timezoneOffsetSeconds) * 1000);
     const dateKey = localDate.toISOString().slice(0, 10);
 
     if (dateKey === currentLocalDate) return;
+
+    const entryTemp = entry.main.temp;
+    const existingRange = tempRangePerDay.get(dateKey);
+    if (!existingRange) {
+      tempRangePerDay.set(dateKey, { min: entryTemp, max: entryTemp });
+    } else {
+      existingRange.min = Math.min(existingRange.min, entryTemp);
+      existingRange.max = Math.max(existingRange.max, entryTemp);
+    }
 
     const hourDistance = Math.abs(localDate.getUTCHours() - 12);
     const existing = bestPerDay.get(dateKey);
@@ -675,12 +704,15 @@ function renderForecast(forecastData, timezoneOffsetSeconds = 0, currentUnixTime
       timeZone: "UTC",
     });
 
+    const range = tempRangePerDay.get(dateKey);
+
     const cardItem = document.createElement("article");
     cardItem.className = "forecast-card";
     cardItem.innerHTML = `
       <span class="forecast-day">${dayName}</span>
       <span class="forecast-emoji">${getWeatherEmoji(id)}</span>
       <span class="forecast-temp">${Math.round(temp)}${getUnitSymbol()}</span>
+      <span class="forecast-range">${Math.round(range.min)}° / ${Math.round(range.max)}°</span>
       <span class="forecast-desc">${description}</span>
       ${pop > 0 ? `<span class="forecast-pop">💧 ${Math.round(pop * 100)}%</span>` : ""}
     `;
@@ -747,17 +779,17 @@ function getTemperatureColor(temp) {
     currentUnit === "metric"
       ? [
           { temp: -20, color: [30, 64, 175] },
-          { temp: 0, color: [125, 211, 252] },
-          { temp: 15, color: [250, 204, 21] },
-          { temp: 30, color: [249, 115, 22] },
-          { temp: 40, color: [220, 38, 38] },
+          { temp: 0,   color: [125, 211, 252] },
+          { temp: 10,  color: [250, 204, 21] },
+          { temp: 25,  color: [249, 115, 22] },
+          { temp: 38,  color: [220, 38, 38] },
         ]
       : [
-          { temp: -4, color: [30, 64, 175] },
-          { temp: 32, color: [125, 211, 252] },
-          { temp: 59, color: [250, 204, 21] },
-          { temp: 86, color: [249, 115, 22] },
-          { temp: 104, color: [220, 38, 38] },
+          { temp: -4,  color: [30, 64, 175] },
+          { temp: 32,  color: [125, 211, 252] },
+          { temp: 50,  color: [250, 204, 21] },
+          { temp: 77,  color: [249, 115, 22] },
+          { temp: 100, color: [220, 38, 38] },
         ];
 
   if (temp <= colorStops[0].temp) {
